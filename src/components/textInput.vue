@@ -48,6 +48,8 @@ input[type="date"].active::-webkit-datetime-edit {
 }
 
 input {
+  -webkit-appearance: none;
+  border-radius: none;
   &.error {
     border-color: red;
   }
