@@ -1,6 +1,10 @@
 <template>
   <div class="container">
-    <Notification :isActive="activeNotification" />
+    <Notification
+      :isActive="activeNotification"
+      :srcImg="notification.srcImg"
+      :text="notification.text"
+    />
     <form action="" class="form" @submit.prevent="sendForm">
       <div class="form__contact">
         <h2 class="form__title">Контактные данные</h2>
@@ -295,6 +299,11 @@ export default {
       whogive: "",
       dateofget: "",
       sms: true,
+      notification: {
+        isActive: false,
+        text: "",
+        srcImg: "",
+      },
     };
   },
   validations() {
@@ -337,12 +346,24 @@ export default {
     isActive(value) {
       return value.length > 0;
     },
+    showNotification(srcImg, text) {
+      this.notification.srcImg = srcImg;
+      this.notification.text = text;
+      this.activeNotification = true;
+    },
     sendForm() {
       this.v$.$touch();
       this.v$.$validate();
-
       if (!(this.v$.$errors.length > 0)) {
-        this.activeNotification = true;
+        this.showNotification(
+          require("../assets/hand.png"),
+          "Клиент успешно создан"
+        );
+      } else {
+        this.showNotification(
+          require("../assets/close.svg"),
+          "Некорректные поля"
+        );
       }
     },
   },
@@ -485,6 +506,7 @@ input[type="text"] {
     font-weight: 500;
     border-radius: 6px;
     color: #fff;
+    max-width: 300px;
     border: 0;
     &:focus {
       outline: 0;
@@ -497,6 +519,9 @@ input[type="text"] {
 
 @media (max-width: 430px) {
   .form {
+    &__button {
+      width: 100%;
+    }
     &__row {
       flex-direction: column;
     }

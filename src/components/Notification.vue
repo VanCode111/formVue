@@ -1,13 +1,13 @@
 <template>
   <div :class="'notification ' + (isActive ? 'active' : '')">
-    <h2 class="notification__text">Клиент успешно создан</h2>
-    <img src="../assets/hand.png" alt="hand" class="notification__icon" />
+    <h2 class="notification__text">{{ text }}</h2>
+    <img :src="srcImg" alt="hand" class="notification__icon" />
   </div>
 </template>
 
 <script>
 export default {
-  props: ["text", "isActive"],
+  props: ["text", "isActive", "srcImg"],
 };
 </script>
 
@@ -28,6 +28,7 @@ export default {
   transition: all 0.8s;
   padding: 20px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   &__icon {
     width: 50px;
@@ -47,9 +48,12 @@ export default {
   .notification {
     width: calc(100% - 20px);
     justify-content: space-between;
-    padding: 10px;
     &__text {
       font-size: 20px;
+    }
+    &__icon {
+      width: 35px;
+      height: auto;
     }
   }
 }
