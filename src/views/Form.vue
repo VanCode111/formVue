@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <Notification :isActive="activeNotification" />
     <form action="" class="form" @submit.prevent="sendForm">
       <div class="form__contact">
         <h2 class="form__title">Контактные данные</h2>
@@ -28,7 +29,6 @@
             type="text"
             title="Отчество"
             :isActive="patronymic.length > 0"
-            required="false"
           />
         </div>
         <div class="form__row">
@@ -38,6 +38,7 @@
             type="date"
             title="Дата рождения"
             :isActive="date.length > 0"
+            :error="v$.date.$error"
             required="true"
           />
           <inputText
@@ -46,8 +47,10 @@
             :modelValue="phone"
             @update:modelValue="(val) => (phone = val)"
             title="Номер телефона"
-            :isActive="phone.length > 1"
+            :isActive="phone.length > 10"
+            :errorText="'11 символов'"
             required="true"
+            :error="v$.phone.$error"
           />
           <Selector
             class="form__gender form__item"
@@ -82,18 +85,18 @@
             title="Группа клиентов"
             :options="[
               {
-                text: 'Иванов',
-                value: 'Ivanov',
+                text: 'VIP',
+                value: 'VIP',
                 id: 6,
               },
               {
-                text: 'Захаров',
-                value: 'Zakharov',
+                text: 'Проблемные',
+                value: 'Проблемные',
                 id: 7,
               },
               {
-                text: 'Чернышева',
-                value: 'Chernisheva',
+                text: 'ОМС',
+                value: 'ОМС',
                 id: 8,
               },
             ]"
@@ -128,8 +131,128 @@
           <Checkbox
             id="checkbox-send"
             class="form__checkbox form__item"
-            name="Отправить смс"
+            name="Не отправлять СМС"
             v-model="sms"
+          />
+        </div>
+      </div>
+      <div class="form__address">
+        <h2 class="form__title">Адрес</h2>
+        <div class="form__row">
+          <inputText
+            class="form__country form__item"
+            v-model="country"
+            type="text"
+            title="Страна"
+            :isActive="country.length > 0"
+          />
+          <inputText
+            class="form__oblast form__item"
+            v-model="oblast"
+            type="text"
+            title="Область"
+            :isActive="oblast.length > 0"
+          />
+          <inputText
+            class="form__city form__item"
+            v-model="city"
+            type="text"
+            title="Город"
+            :error="v$.city.$error"
+            :isActive="city.length > 0"
+            :required="true"
+          />
+        </div>
+        <div class="form__row">
+          <inputText
+            class="form__street form__item"
+            v-model="street"
+            type="text"
+            title="Улица"
+            :isActive="street.length > 0"
+          />
+          <inputText
+            class="form__house form__item"
+            v-model="house"
+            type="text"
+            title="Дом"
+            :isActive="house.length > 0"
+          />
+        </div>
+        <div class="form__row">
+          <inputText
+            class="form__index form__item"
+            v-model="index"
+            type="text"
+            title="Индекс"
+            :isActive="index.length > 0"
+          />
+        </div>
+      </div>
+      <div class="form__document">
+        <h2 class="form__title">Документ</h2>
+        <div class="form__row">
+          <Selector
+            class="form__typeOfDocument form__item"
+            className="form__typeOfDocument"
+            v-model="typeofdocument"
+            :isActive="isActive(typeofdocument)"
+            title="Тип документа"
+            :required="true"
+            :error="v$.typeofdocument.$error"
+            :options="[
+              {
+                text: 'Паспорт',
+                value: 'Паспорт',
+                id: 9,
+              },
+              {
+                text: 'Свидетельство о рождении',
+                value: 'Свидетельство о рождении',
+                id: 10,
+              },
+              {
+                text: 'Вод. удостоверение',
+                value: 'Вод. удостоверение',
+                id: 11,
+              },
+            ]"
+          />
+        </div>
+        <div class="form__row">
+          <inputText
+            type="text"
+            class="form__seria form__item"
+            v-model="seria"
+            title="Серия"
+            :isActive="seria.length > 0"
+          />
+          <inputText
+            type="text"
+            class="form__number form__item"
+            v-model="number"
+            title="Номер"
+            :isActive="number.length > 0"
+          />
+        </div>
+        <div class="form__row">
+          <inputText
+            type="text"
+            class="form__whogive form__item"
+            v-model="whogive"
+            title="Кем выдан"
+            :isActive="whogive.length > 0"
+          />
+        </div>
+        <div class="form__row">
+          <inputText
+            v-model="dateofget"
+            class="form__dateofget form__item"
+            type="date"
+            title="Дата выдачи"
+            :required="true"
+            :isActive="dateofget.length > 0"
+            :error="v$.dateofget.$error"
           />
         </div>
       </div>
@@ -142,8 +265,9 @@
 import Selector from "../components/Selector.vue";
 import Checkbox from "../components/Checkbox.vue";
 import inputText from "../components/textInput.vue";
+import Notification from "../components/Notification.vue";
 import useVuelidate from "@vuelidate/core";
-import { required } from "@vuelidate/validators";
+import { required, minLength } from "@vuelidate/validators";
 export default {
   name: "Form",
 
@@ -158,36 +282,75 @@ export default {
       phone: "7",
       doctor: "",
       clients: [],
+      index: "",
+      country: "",
+      city: "",
+      house: "",
+      street: "",
+      oblast: "",
+      typeofdocument: "",
+      activeNotification: false,
+      seria: "",
+      number: "",
+      whogive: "",
+      dateofget: "",
       sms: true,
     };
   },
   validations() {
     return {
-      phone: { required },
+      phone: { minLength: minLength(11) },
       clients: { required },
       name: { required },
       surname: { required },
+      city: { required },
+      typeofdocument: { required },
+      dateofget: { required },
+      date: { required },
     };
   },
   watch: {
+    activeNotification() {
+      if (this.activeNotification) {
+        setTimeout(() => {
+          this.activeNotification = false;
+        }, 3000);
+      }
+    },
     phone() {
       setTimeout(() => {
-        this.phone = "7" + this.phone.slice(1).replace(/[^0-9]/g, "");
+        this.phone =
+          "7" +
+          this.phone
+            .slice(1)
+            .replace(/[^0-9]/g, "")
+            .slice(0, 10);
+      });
+    },
+    index() {
+      setTimeout(() => {
+        this.index = this.index.replace(/[^0-9]/g, "");
       });
     },
   },
   methods: {
     isActive(value) {
-      return value.length;
+      return value.length > 0;
     },
     sendForm() {
       this.v$.$touch();
+      this.v$.$validate();
+
+      if (!(this.v$.$errors.length > 0)) {
+        this.activeNotification = true;
+      }
     },
   },
   components: {
     Selector,
     Checkbox,
     inputText,
+    Notification,
   },
 };
 </script>
@@ -216,7 +379,6 @@ $main-color: #22b2ea;
 }
 input[type="text"] {
   text-rendering: none;
-  appearance: none;
   color: transparent;
 }
 
@@ -227,6 +389,24 @@ input[type="text"] {
   border-radius: 10px;
   grid-template-columns: repeat(12, 1fr);
   grid-template-rows: repeat(12, 1fr);
+  &__typeOfDocument {
+    width: 300px;
+    flex-shrink: 0;
+  }
+  &__whogive {
+    max-width: 600px;
+  }
+  &__dateofget,
+  &__country,
+  &__city,
+  &__oblast,
+  &__house,
+  &__street,
+  &__index,
+  &__seria,
+  &__number {
+    max-width: 200px;
+  }
   &__clients,
   &__doctor {
     width: 200px;
@@ -244,7 +424,7 @@ input[type="text"] {
     max-width: 200px;
   }
   &__date {
-    max-width: 180px;
+    max-width: 200px;
     flex-shrink: 1;
   }
   &__phone {
@@ -298,6 +478,7 @@ input[type="text"] {
     padding: 10px;
     font-weight: 500;
     cursor: pointer;
+    margin-top: 20px;
     width: 100%;
     grid-column: span 3;
     grid-row: 3;
@@ -322,6 +503,9 @@ input[type="text"] {
     &__item {
       max-width: none;
       width: 100%;
+    }
+    &__item + &__item {
+      margin-left: 0;
     }
     &__item + &__item {
       margin-top: 30px;

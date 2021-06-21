@@ -14,14 +14,24 @@
     <label for="" class="form__label"
       >{{ title }} <span>{{ required ? "*" : "" }}</span></label
     >
-    <span v-if="error" class="error__title">Обязательное поле</span>
+    <span v-if="error" class="error__title">{{
+      errorText ? "Номер из 11 цифр" : "Обязательное поле"
+    }}</span>
   </div>
 </template>
 
 <script>
 export default {
   name: "textInput",
-  props: ["modelValue", "isActive", "title", "required", "error", "type"],
+  props: [
+    "modelValue",
+    "isActive",
+    "title",
+    "required",
+    "error",
+    "type",
+    "errorText",
+  ],
   watch: {
     modelValue() {},
   },
@@ -49,7 +59,7 @@ input[type="date"].active::-webkit-datetime-edit {
 
 input {
   -webkit-appearance: none;
-  border-radius: none;
+  -webkit-border-radius: 0;
   &.error {
     border-color: red;
   }
@@ -75,6 +85,9 @@ input {
       transform: translateY(-1rem);
     }
   }
+}
+input[type="date"] {
+  height: 25px;
 }
 .form__label {
   color: #8597a3;
